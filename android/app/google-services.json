@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "498711770847",
+    "firebase_url": "https://inventory-e1dff.firebaseio.com",
+    "project_id": "inventory-e1dff",
+    "storage_bucket": "inventory-e1dff.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:498711770847:android:81725e30d35e2de2",
+        "android_client_info": {
+          "package_name": "com.wohlbruck.inventory"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "498711770847-7kgegupes16o7nj8441o1ad72usl7cev.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.wohlbruck.inventory",
+            "certificate_hash": "9fb44fb84a7bf1cfca7ad732f959fda4980150d3"
+          }
+        },
+        {
+          "client_id": "498711770847-3lfan1n5mhl5k4qp18ak9mpkvb0os9fi.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBQlWNIoO8gJmPLllOd8KNWbznPIzvHXxw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "498711770847-3lfan1n5mhl5k4qp18ak9mpkvb0os9fi.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
