@@ -62,52 +62,104 @@ class _GroupDetailState extends State<GroupDetail> {
   Widget build(BuildContext context) {
     const gridPadding = 2.5;
 
-    return Container(
-      padding: const EdgeInsets.all(gridPadding),
-      child: StreamBuilder<QuerySnapshot>(
-        stream: widget.group != null
-          ? Firestore.instance.collection('groups').where('group', isEqualTo: widget.group).snapshots()
-          : Firestore.instance.collection('groups').where('group', isNull: true).snapshots(),
-        builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-          if (snapshot.hasError) {
-            return Text('Error: ${snapshot.error}');
-          }
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(
-              child: CircularProgressIndicator()
-            );
-          } else {
-            return GridView.count(
-              crossAxisCount: 2,
-              children: snapshot.data.documents.map((DocumentSnapshot document) {
-                return Container(
-                  padding: const EdgeInsets.all(gridPadding),
-                  child: GridTile(
-                    child: InkResponse(
-                      enableFeedback: true,
-                      child: Image.network(
-                        document['image'],
-                        fit: BoxFit.cover
+    return Column(
+      children: <Widget>[
+        StreamBuilder<QuerySnapshot>(
+          stream: widget.group != null
+            ? Firestore.instance
+              .collection('groups')
+              .where('group', isEqualTo: widget.group)
+              .snapshots()
+            : Firestore.instance
+              .collection('groups')
+              .where('group', isNull: true)
+              .snapshots(),
+              
+          builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+            if (snapshot.hasError) {
+              return Text('Error: ${snapshot.error}');
+            }
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Center(
+                child: CircularProgressIndicator()
+              );
+            } else {
+              if (snapshot.hasData && snapshot.data.documents.length == 0) {
+                // No data, return nothing
+                return Container();
+              }
+              return GridView.count(
+                crossAxisCount: 2,
+                shrinkWrap: true,
+                children: snapshot.data.documents.map((DocumentSnapshot document) {
+                  return Container(
+                    padding: const EdgeInsets.all(gridPadding),
+                    child: GridTile(
+                      child: InkResponse(
+                        enableFeedback: true,
+                        child: Image.network(
+                          document['image'],
+                          fit: BoxFit.cover
+                        ),
+                        onTap: () {
+                          Navigator.push(context, MaterialPageRoute(builder: (context) => HomePage(
+                            title: document['name'],
+                            group: document.reference,
+                          )));
+                        }
                       ),
-                      onTap: () {
-                        Navigator.push(context, MaterialPageRoute(builder: (context) => HomePage(
-                          title: document['name'],
-                          group: document.reference,
-                        )));
-                      }
-                    ),
-                    footer: GridTileBar(
-                      backgroundColor: Colors.black38,
-                      title: Text(document['name']),
-                      subtitle: Text('Subtitle'),
+                      footer: GridTileBar(
+                        backgroundColor: Colors.black38,
+                        title: Text(document['name']),
+                        subtitle: Text('Subtitle'),
+                      )
                     )
-                  )
-                );
-              }).toList()
-            );  
+                  );
+                }).toList()
+              );  
+            }
           }
-        }
-      )
+        ),
+        StreamBuilder<QuerySnapshot>(
+          stream: widget.group != null
+            ? Firestore.instance
+              .collection('items')
+              .where('group', isEqualTo: widget.group)
+              .snapshots()
+            : Firestore.instance
+              .collection('items')
+              .where('group', isNull: true)
+              .snapshots(),
+              
+          builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+            if (snapshot.hasError) {
+              return Text('Error: ${snapshot.error}');
+            }
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Center(
+                child: CircularProgressIndicator()
+              );
+            }
+            if (snapshot.connectionState != ConnectionState.waiting && snapshot.hasData) {
+              return ListView(
+                shrinkWrap: true,
+                children: snapshot.data.documents.map((DocumentSnapshot document) {
+                  return ListTile(
+                    leading: document['image'] != null
+                      ? CircleAvatar(
+                        backgroundImage: NetworkImage(document['image']),
+                      )
+                      : null,
+                    title: Text(document['name']),
+                    subtitle: Text('Subtitle'),
+                    trailing: Icon(Icons.more_vert)
+                  );
+                }).toList()
+              );  
+            }
+          }
+        ),
+      ],
     );
   }
 }
