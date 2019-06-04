@@ -62,17 +62,37 @@ class _HomePageState extends State<HomePage> {
         notchMargin: 4.0,
         child: Padding(
           padding: const EdgeInsets.all(25.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start,
+          child: Row(
+            mainAxisSize: MainAxisSize.max,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[
-              Text('My home', style: textTheme.title.apply(fontWeightDelta: 1)),
-              Padding(
-                padding: const EdgeInsets.only(top: 3.0, bottom: 5.0),
-                child: Text('6 groups and 3 items', style: textTheme.subtitle),
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 15.0),
+                    child: Row(
+                      children: <Widget>[
+                        Text('Home'),
+                        Icon(Icons.keyboard_arrow_right, size: 16.0),
+                        Text('Bedroom'),
+                        Icon(Icons.keyboard_arrow_right, size: 16.0),
+                        Text('Dresser'),
+                        Icon(Icons.keyboard_arrow_down, size: 16.0),
+                      ],
+                    ),
+                  ),
+                  Text('My home', style: textTheme.title.apply(fontWeightDelta: 1)),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4.0, bottom: 6.0),
+                    child: Text('6 groups and 3 items', style: textTheme.subtitle),
+                  ),
+                  Text('182 total items - \$12,382 value', style: textTheme.caption),
+                ],
               ),
-              Text('182 total items - \$12,382 value', style: textTheme.caption),
+              IconButton(icon: Icon(Icons.star_border), onPressed: () {},)
             ],
           ),
         ),
@@ -83,7 +103,7 @@ class _HomePageState extends State<HomePage> {
 
 
 class GroupDetail extends StatefulWidget {
-  final DocumentReference group;
+  DocumentReference group;
 
   GroupDetail({this.group});
 
@@ -124,34 +144,36 @@ class _GroupDetailState extends State<GroupDetail> {
                 return Container();
               }
               return GridView.count(
-                crossAxisCount: 2,
+                crossAxisCount: 3,
                 shrinkWrap: true,
+                primary: false,
                 children: snapshot.data.documents.map((DocumentSnapshot document) {
                   return Container(
                     padding: const EdgeInsets.all(gridPadding),
-                    child: GridTile(
-                      child: InkResponse(
-                        enableFeedback: true,
+                    child: InkResponse(
+                      onTap: () {
+                        setState(() => widget.group = document.reference);
+                        // Navigator.push(context, MaterialPageRoute(builder: (context) => HomePage(
+                        //   title: document['name'],
+                        //   group: ,
+                        // )));
+                      },
+                      enableFeedback: true,
+                      child: GridTile(
                         child: Image.network(
                           document['image'],
                           fit: BoxFit.cover
                         ),
-                        onTap: () {
-                          Navigator.push(context, MaterialPageRoute(builder: (context) => HomePage(
-                            title: document['name'],
-                            group: document.reference,
-                          )));
-                        }
+                        footer: GridTileBar(
+                          backgroundColor: Colors.black38,
+                          title: Text(document['name']),
+                          subtitle: Text('Subtitle'),
+                        )
                       ),
-                      footer: GridTileBar(
-                        backgroundColor: Colors.black38,
-                        title: Text(document['name']),
-                        subtitle: Text('Subtitle'),
-                      )
                     )
                   );
                 }).toList()
-              );  
+              );
             }
           }
         ),
@@ -176,21 +198,33 @@ class _GroupDetailState extends State<GroupDetail> {
               );
             }
             if (snapshot.connectionState != ConnectionState.waiting && snapshot.hasData) {
-              return ListView(
+              return GridView.count(
+                crossAxisCount: 4,
                 shrinkWrap: true,
+                primary: false,
                 children: snapshot.data.documents.map((DocumentSnapshot document) {
-                  return ListTile(
-                    leading: document['image'] != null
-                      ? CircleAvatar(
-                        backgroundImage: NetworkImage(document['image']),
-                      )
-                      : null,
-                    title: Text(document['name']),
-                    subtitle: Text('Subtitle'),
-                    trailing: Icon(Icons.more_vert)
+                  return Container(
+                    padding: const EdgeInsets.all(gridPadding),
+                    child: InkResponse(
+                      onTap: () {
+                        setState(() => widget.group = document.reference);
+                      },
+                      enableFeedback: true,
+                      child: GridTile(
+                        child: Image.network(
+                          document['image'],
+                          fit: BoxFit.cover
+                        ),
+                        footer: GridTileBar(
+                          backgroundColor: Colors.black38,
+                          title: Text(document['name']),
+                          subtitle: Text('Subtitle'),
+                        )
+                      ),
+                    )
                   );
                 }).toList()
-              );  
+              );
             }
           }
         ),
