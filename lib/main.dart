@@ -1,16 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/services.dart';
 
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
+
   @override
   Widget build(BuildContext context) {
+    const primary = Color(0xFF20CBD8);
+    const primaryDark = Color(0xFF19B5C1);
+    const accent = Color(0xFFFFF453);
+
+    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+      statusBarIconBrightness: Brightness.light,
+      systemNavigationBarColor: primaryDark,
+      systemNavigationBarIconBrightness: Brightness.light,
+    ));
+
     return MaterialApp(
       title: 'Inventory',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        brightness: Brightness.dark,
+        primaryColor: primary,
+        accentColor: accent,
+        fontFamily: 'Lato',
       ),
       home: HomePage(title: 'Inventory'),
     );
@@ -31,16 +45,37 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-      ),
       body: GroupDetail(group: widget.group),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           
         },
         child: Icon(Icons.add),
+      ),
+      bottomNavigationBar: BottomAppBar(
+        color: Theme.of(context).primaryColor,
+        shape: CircularNotchedRectangle(),
+        notchMargin: 4.0,
+        child: Padding(
+          padding: const EdgeInsets.all(25.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Text('My home', style: textTheme.title.apply(fontWeightDelta: 1)),
+              Padding(
+                padding: const EdgeInsets.only(top: 3.0, bottom: 5.0),
+                child: Text('6 groups and 3 items', style: textTheme.subtitle),
+              ),
+              Text('182 total items - \$12,382 value', style: textTheme.caption),
+            ],
+          ),
+        ),
       ),
     );
   }
