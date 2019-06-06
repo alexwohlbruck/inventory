@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
+import 'dart:collection';
 
 void main() => runApp(MyApp());
 
@@ -45,6 +46,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
+    final Queue navigationStack = new Queue();
 
     return Scaffold(
       body: GroupDetail(group: widget.group),
@@ -53,51 +55,81 @@ class _HomePageState extends State<HomePage> {
         onPressed: () {},
         child: Icon(Icons.add),
       ),
-      bottomNavigationBar: BottomAppBar(
-        color: Theme.of(context).primaryColor,
-        shape: CircularNotchedRectangle(),
-        notchMargin: 4.0,
-        child: Padding(
-          padding: const EdgeInsets.all(25.0),
-          child: Row(
-            mainAxisSize: MainAxisSize.max,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: <Widget>[
-              Column(
-                mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 15.0),
-                    child: Row(
-                      children: <Widget>[
-                        Text('Home'),
-                        Icon(Icons.keyboard_arrow_right, size: 16.0),
-                        Text('Bedroom'),
-                        Icon(Icons.keyboard_arrow_right, size: 16.0),
-                        Text('Dresser'),
-                        Icon(Icons.keyboard_arrow_down, size: 16.0),
-                      ],
-                    ),
+      bottomNavigationBar: new GroupDetailBar(textTheme: textTheme, navigationStack: navigationStack),
+    );
+  }
+}
+
+class GroupDetailBar extends StatelessWidget {
+  const GroupDetailBar({
+    Key key,
+    @required this.textTheme,
+    @required this.navigationStack,
+  }) : super(key: key);
+
+  final TextTheme textTheme;
+  final Queue navigationStack;
+
+  @override
+  Widget build(BuildContext context) {
+    return BottomAppBar(
+      color: Theme.of(context).primaryColor,
+      shape: CircularNotchedRectangle(),
+      notchMargin: 4.0,
+      child: Padding(
+        padding: const EdgeInsets.all(25.0),
+
+        // App bar contents
+        child: Row(
+          mainAxisSize: MainAxisSize.max,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: <Widget>[
+            
+            // Left text
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                
+                // Breadcrumbs
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 15.0),
+                  child: Row(
+                    children: navigationStack.map((group) {
+                      return Text(group['name']);
+                    })
+                    .toList(),
+                    /*<Widget>[
+                      Text('Home'),
+                      Icon(Icons.keyboard_arrow_right, size: 16.0),
+                      Text('Bedroom'),
+                      Icon(Icons.keyboard_arrow_right, size: 16.0),
+                      Text('Dresser'),
+                      Icon(Icons.keyboard_arrow_down, size: 16.0),
+                    ]*/
                   ),
-                  Text('My home',
-                      style: textTheme.title.apply(fontWeightDelta: 1)),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 4.0, bottom: 6.0),
-                    child:
-                        Text('6 groups and 3 items', style: textTheme.subtitle),
-                  ),
-                  Text('182 total items - \$12,382 value',
-                      style: textTheme.caption),
-                ],
-              ),
-              IconButton(
-                icon: Icon(Icons.star_border),
-                onPressed: () {},
-              )
-            ],
-          ),
+                ),
+                
+                // Group details
+                Text('My home',
+                    style: textTheme.title.apply(fontWeightDelta: 1)),
+                Padding(
+                  padding: const EdgeInsets.only(top: 4.0, bottom: 6.0),
+                  child:
+                      Text('6 groups and 3 items', style: textTheme.subtitle),
+                ),
+                Text('182 total items - \$12,382 value',
+                    style: textTheme.caption),
+              ],
+            ),
+
+            // Star button
+            IconButton(
+              icon: Icon(Icons.star_border),
+              onPressed: () {},
+            )
+          ],
         ),
       ),
     );
@@ -239,67 +271,71 @@ class Tile extends StatelessWidget {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
 
-    return Container(
-      decoration: BoxDecoration(boxShadow: [
-        BoxShadow(
-            color: Colors.black45,
-            blurRadius: 5.0,
-            spreadRadius: 0.0,
-            offset: Offset(0.0, 1.5))
-      ]),
-      child: ClipRRect(
-        // Round corners
-        borderRadius: BorderRadius.circular(7.0),
-        child: Stack(
-          alignment: Alignment.topLeft,
-          children: <Widget>[
-            // Background image
-            Container(
-              decoration: BoxDecoration(
-                  image: DecorationImage(
-                image: NetworkImage(item['image']),
-                fit: BoxFit.fill,
-              )),
-            ),
-            // Gradient scrim
-            Container(
-              width: double.infinity,
-              decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      stops: [0.0, 1.0],
-                      colors: [Color(0x00000000), Color(0xAA000000)])),
-            ),
-            // Text layout
-            Container(
-              width: double.infinity,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  IconButton(icon: Icon(Icons.star_border)),
-                  Spacer(),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 10.0, vertical: 15.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        Text(
-                          item['name'],
-                          style: textTheme.subtitle,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        Text('4 groups - 24 items', style: textTheme.caption),
-                      ],
-                    ),
-                  ),
-                  
-                ],
+    return InkWell(
+      onTap: () {
+        // TODO: Add current group to navigationStack
+      },
+      child: Container(
+        decoration: BoxDecoration(boxShadow: [
+          BoxShadow(
+              color: Colors.black45,
+              blurRadius: 5.0,
+              spreadRadius: 0.0,
+              offset: Offset(0.0, 1.5))
+        ]),
+        child: ClipRRect(
+          // Round corners
+          borderRadius: BorderRadius.circular(7.0),
+          child: Stack(
+            alignment: Alignment.topLeft,
+            children: <Widget>[
+              // Background image
+              Container(
+                decoration: BoxDecoration(
+                    image: DecorationImage(
+                  image: NetworkImage(item['image']),
+                  fit: BoxFit.fill,
+                )),
               ),
-            )
-          ],
+              // Gradient scrim
+              Container(
+                width: double.infinity,
+                decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        stops: [0.0, 1.0],
+                        colors: [Color(0x00000000), Color(0xAA000000)])),
+              ),
+              // Text layout
+              Container(
+                width: double.infinity,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    IconButton(icon: Icon(Icons.star_border)),
+                    Spacer(),
+                    Padding(  
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10.0, vertical: 15.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          Text(
+                            item['name'], 
+                            style: textTheme.subtitle,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          Text('4 groups - 24 items', style: textTheme.caption),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            ],
+          ),
         ),
       ),
     );
