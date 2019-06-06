@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
 
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
-
   @override
   Widget build(BuildContext context) {
     const primary = Color(0xFF20CBD8);
@@ -42,7 +42,6 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
@@ -51,9 +50,7 @@ class _HomePageState extends State<HomePage> {
       body: GroupDetail(group: widget.group),
       floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          
-        },
+        onPressed: () {},
         child: Icon(Icons.add),
       ),
       bottomNavigationBar: BottomAppBar(
@@ -84,15 +81,21 @@ class _HomePageState extends State<HomePage> {
                       ],
                     ),
                   ),
-                  Text('My home', style: textTheme.title.apply(fontWeightDelta: 1)),
+                  Text('My home',
+                      style: textTheme.title.apply(fontWeightDelta: 1)),
                   Padding(
                     padding: const EdgeInsets.only(top: 4.0, bottom: 6.0),
-                    child: Text('6 groups and 3 items', style: textTheme.subtitle),
+                    child:
+                        Text('6 groups and 3 items', style: textTheme.subtitle),
                   ),
-                  Text('182 total items - \$12,382 value', style: textTheme.caption),
+                  Text('182 total items - \$12,382 value',
+                      style: textTheme.caption),
                 ],
               ),
-              IconButton(icon: Icon(Icons.star_border), onPressed: () {},)
+              IconButton(
+                icon: Icon(Icons.star_border),
+                onPressed: () {},
+              )
             ],
           ),
         ),
@@ -100,7 +103,6 @@ class _HomePageState extends State<HomePage> {
     );
   }
 }
-
 
 class GroupDetail extends StatefulWidget {
   DocumentReference group;
@@ -112,123 +114,194 @@ class GroupDetail extends StatefulWidget {
 }
 
 class _GroupDetailState extends State<GroupDetail> {
-
   @override
   Widget build(BuildContext context) {
-    const gridPadding = 2.5;
+    const gridPadding = 4.0;
+
+    // return Padding(
+    //   padding: const EdgeInsets.all(50.0),
+    //   child: Container(
+    //     width: 150.0,
+    //     height: 150.0,
+
+    //     child: new Tile(),
+    //   ),
+    // );
 
     return Column(
       children: <Widget>[
         StreamBuilder<QuerySnapshot>(
-          stream: widget.group != null
-            ? Firestore.instance
-              .collection('groups')
-              .where('group', isEqualTo: widget.group)
-              .snapshots()
-            : Firestore.instance
-              .collection('groups')
-              .where('group', isNull: true)
-              .snapshots(),
-              
-          builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-            if (snapshot.hasError) {
-              return Text('Error: ${snapshot.error}');
-            }
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return Center(
-                child: CircularProgressIndicator()
-              );
-            } else {
-              if (snapshot.hasData && snapshot.data.documents.length == 0) {
-                // No data, return nothing
-                return Container();
+            stream: widget.group != null
+                ? Firestore.instance
+                    .collection('groups')
+                    .where('group', isEqualTo: widget.group)
+                    .snapshots()
+                : Firestore.instance
+                    .collection('groups')
+                    .where('group', isNull: true)
+                    .snapshots(),
+            builder:
+                (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+              if (snapshot.hasError) {
+                return Text('Error: ${snapshot.error}');
               }
-              return GridView.count(
-                crossAxisCount: 3,
-                shrinkWrap: true,
-                primary: false,
-                children: snapshot.data.documents.map((DocumentSnapshot document) {
-                  return Container(
-                    padding: const EdgeInsets.all(gridPadding),
-                    child: InkResponse(
-                      onTap: () {
-                        setState(() => widget.group = document.reference);
-                        // Navigator.push(context, MaterialPageRoute(builder: (context) => HomePage(
-                        //   title: document['name'],
-                        //   group: ,
-                        // )));
-                      },
-                      enableFeedback: true,
-                      child: GridTile(
-                        child: Image.network(
-                          document['image'],
-                          fit: BoxFit.cover
-                        ),
-                        footer: GridTileBar(
-                          backgroundColor: Colors.black38,
-                          title: Text(document['name']),
-                          subtitle: Text('Subtitle'),
-                        )
-                      ),
-                    )
-                  );
-                }).toList()
-              );
-            }
-          }
-        ),
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Center(child: CircularProgressIndicator());
+              } else {
+                if (snapshot.hasData && snapshot.data.documents.length == 0) {
+                  // No data, return nothing
+                  return Container();
+                }
+                return GridView.count(
+                    crossAxisCount: 2,
+                    childAspectRatio: 1.5,
+                    shrinkWrap: true,
+                    primary: false,
+                    children: snapshot.data.documents
+                        .map((DocumentSnapshot document) {
+                      return Container(
+                        padding: const EdgeInsets.all(gridPadding),
+                        child: Tile(item: document, type: "group"),
+                      );
+                      return Container(
+                          padding: const EdgeInsets.all(gridPadding),
+                          child: InkResponse(
+                            onTap: () {
+                              setState(() => widget.group = document.reference);
+                              // Navigator.push(context, MaterialPageRoute(builder: (context) => HomePage(
+                              //   title: document['name'],
+                              //   group: ,
+                              // )));
+                            },
+                            enableFeedback: true,
+                            child: GridTile(
+                                child: Image.network(document['image'],
+                                    fit: BoxFit.cover),
+                                footer: GridTileBar(
+                                  backgroundColor: Colors.black38,
+                                  title: Text(document['name']),
+                                  subtitle: Text('Subtitle'),
+                                )),
+                          ));
+                    }).toList());
+              }
+            }),
         StreamBuilder<QuerySnapshot>(
-          stream: widget.group != null
-            ? Firestore.instance
-              .collection('items')
-              .where('group', isEqualTo: widget.group)
-              .snapshots()
-            : Firestore.instance
-              .collection('items')
-              .where('group', isNull: true)
-              .snapshots(),
-              
-          builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-            if (snapshot.hasError) {
-              return Text('Error: ${snapshot.error}');
-            }
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return Center(
-                child: CircularProgressIndicator()
-              );
-            }
-            if (snapshot.connectionState != ConnectionState.waiting && snapshot.hasData) {
-              return GridView.count(
-                crossAxisCount: 4,
-                shrinkWrap: true,
-                primary: false,
-                children: snapshot.data.documents.map((DocumentSnapshot document) {
-                  return Container(
-                    padding: const EdgeInsets.all(gridPadding),
-                    child: InkResponse(
-                      onTap: () {
-                        setState(() => widget.group = document.reference);
-                      },
-                      enableFeedback: true,
-                      child: GridTile(
-                        child: Image.network(
-                          document['image'],
-                          fit: BoxFit.cover
-                        ),
-                        footer: GridTileBar(
-                          backgroundColor: Colors.black38,
-                          title: Text(document['name']),
-                          subtitle: Text('Subtitle'),
-                        )
-                      ),
-                    )
-                  );
-                }).toList()
-              );
-            }
-          }
-        ),
+            stream: widget.group != null
+                ? Firestore.instance
+                    .collection('items')
+                    .where('group', isEqualTo: widget.group)
+                    .snapshots()
+                : Firestore.instance
+                    .collection('items')
+                    .where('group', isNull: true)
+                    .snapshots(),
+            builder:
+                (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+              if (snapshot.hasError) {
+                return Text('Error: ${snapshot.error}');
+              }
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Center(child: CircularProgressIndicator());
+              }
+              if (snapshot.connectionState != ConnectionState.waiting &&
+                  snapshot.hasData) {
+                return GridView.count(
+                    crossAxisCount: 3,
+                    shrinkWrap: true,
+                    primary: false,
+                    children: snapshot.data.documents
+                        .map((DocumentSnapshot document) {
+                      return Padding(
+                        padding: const EdgeInsets.all(gridPadding),
+                        child: Tile(item: document, type: "item"),
+                      );
+                    }).toList());
+              }
+            }),
       ],
+    );
+  }
+}
+
+// A tile that displays a group or item
+class Tile extends StatelessWidget {
+  const Tile({
+    Key key,
+    @required this.item,
+    @required this.type, // 'group', 'item'
+  }) : super(key: key);
+
+  final DocumentSnapshot item;
+  final String type;
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+
+    return Container(
+      decoration: BoxDecoration(boxShadow: [
+        BoxShadow(
+            color: Colors.black45,
+            blurRadius: 5.0,
+            spreadRadius: 0.0,
+            offset: Offset(0.0, 1.5))
+      ]),
+      child: ClipRRect(
+        // Round corners
+        borderRadius: BorderRadius.circular(7.0),
+        child: Stack(
+          alignment: Alignment.topLeft,
+          children: <Widget>[
+            // Background image
+            Container(
+              decoration: BoxDecoration(
+                  image: DecorationImage(
+                image: NetworkImage(item['image']),
+                fit: BoxFit.fill,
+              )),
+            ),
+            // Gradient scrim
+            Container(
+              width: double.infinity,
+              decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      stops: [0.0, 1.0],
+                      colors: [Color(0x00000000), Color(0xAA000000)])),
+            ),
+            // Text layout
+            Container(
+              width: double.infinity,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  IconButton(icon: Icon(Icons.star_border)),
+                  Spacer(),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 10.0, vertical: 15.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Text(
+                          item['name'],
+                          style: textTheme.subtitle,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        Text('4 groups - 24 items', style: textTheme.caption),
+                      ],
+                    ),
+                  ),
+                  
+                ],
+              ),
+            )
+          ],
+        ),
+      ),
     );
   }
 }
