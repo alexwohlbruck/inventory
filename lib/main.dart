@@ -27,7 +27,7 @@ class MyApp extends StatelessWidget {
         accentColor: accent,
         fontFamily: 'Lato',
       ),
-      home: HomePage(title: 'Inventory'),
+      home: HomePage(),
     );
   }
 }

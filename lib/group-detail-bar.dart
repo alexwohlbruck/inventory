@@ -1,5 +1,7 @@
 
 import 'package:flutter/material.dart';
+import 'package:inventory/navigation-model.dart';
+import 'package:scoped_model/scoped_model.dart';
 
 class GroupDetailBar extends StatelessWidget {
   const GroupDetailBar({
@@ -34,20 +36,7 @@ class GroupDetailBar extends StatelessWidget {
                 // * Breadcrumbs
                 Padding(
                   padding: const EdgeInsets.only(bottom: 15.0),
-                  child: Row(
-										// TODO: Iterate through nav stack items
-                    /* children: navigationStack.map((group) {
-                      return Text(group['name']);
-                    }).toList(), */
-                    /*<Widget>[
-                      Text('Home'),
-                      Icon(Icons.keyboard_arrow_right, size: 16.0),
-                      Text('Bedroom'),
-                      Icon(Icons.keyboard_arrow_right, size: 16.0),
-                      Text('Dresser'),
-                      Icon(Icons.keyboard_arrow_down, size: 16.0),
-                    ]*/
-                  ),
+                  child: Breadcrumbs(),
                 ),
 
                 // * Group details
@@ -71,6 +60,57 @@ class GroupDetailBar extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class Breadcrumbs extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return ScopedModelDescendant<NavigationModel>(
+      builder: (context, child, model){
+        
+        // * Build breadcrumbs for navigation
+        var breadcrumbs = model.navigationStack.map((item) {
+          return Breadcrumb(text: item['name'], isLast: false);
+        }).toList();
+
+        breadcrumbs.insert(0, Breadcrumb(text: 'Home', isLast: false));
+
+        return Row(
+          children: breadcrumbs,
+        );
+      }
+    );
+  }
+}
+
+class Breadcrumb extends StatelessWidget {
+  const Breadcrumb({
+    Key key,
+    @required this.text,
+    @required this.isLast,
+  }) : super(key: key);
+
+  final String text;
+  final bool isLast;
+
+  @override
+  Widget build(BuildContext context) {
+    return ScopedModelDescendant<NavigationModel>(
+      builder: (context, child, model) {
+        return InkWell(
+          onTap: () {
+            model.regressHistory();            
+          },
+          child: Row(
+            children: <Widget>[
+              Text(text),
+              Icon(isLast ? Icons.keyboard_arrow_down : Icons.keyboard_arrow_right, size: 16.0),
+            ],
+          ),
+        );
+      }
     );
   }
 }
