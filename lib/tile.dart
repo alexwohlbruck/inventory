@@ -31,10 +31,15 @@ class _TileState extends State<Tile> {
       builder: (context, child, model) {
         return InkWell(
           onTap: () {
+            // FIXME: Ink stays behind tile
+
             if (widget.type == 'group') {
               // Group pressed, add it to nav history and reload state with new group
               // navigationStack.addLast(item);
               model.advanceHistory(widget.item);
+            }
+            else {
+              // TODO: Open item view
             }
           },
           child: Container(
